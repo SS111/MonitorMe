@@ -5,12 +5,13 @@ import java.io.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class MonitorMeCore extends JavaPlugin
+public class MonitorMeCore extends JavaPlugin
 {
 	public ServerSocket ss;
 	public Socket cs;
 	public PrintWriter out;
 	public BufferedReader in;
+	public String PasswordHash;
 	
 	@Override
 	public void onEnable()
@@ -24,26 +25,37 @@ public final class MonitorMeCore extends JavaPlugin
 		
 		getLogger().info("MonitorMe loaded! Starting mini-server...");
 		
-		try
+		try 
 		{
 			ss = new ServerSocket(config.getInt("Port"));
-		} 
+			getLogger().info("Mini-server is enabled and listening on port " + config.getInt("Port") + "!");
+		}
 		catch (IOException e)
 		{
-			getLogger().severe("Mini-server cannot listen on port " + config.getInt("Port") + "! Is the port correctly forwarded?");
 			e.printStackTrace();
+			getLogger().severe("Mini-server cannot be started on port " + config.getInt("Port") + "! Is the port forwarding set up correctly?");
 		}
 		
-		getLogger().info("Mini-server is enabled and listening on port " + config.getInt("Port") + "!");
+		PasswordHash = config.getString("Password");
 		
-		try
+		getServer().getScheduler().runTaskAsynchronously(this, new Runnable()
 		{
-			cs = ss.accept();
-		}
-		catch (IOException e)
-		{
+			@Override
+			public void run()
+			{
+				try
+				{
+					cs = ss.accept();
+				} 
+				catch (IOException e)
+				{
+					//Is this thread safe?
+					getLogger().severe("A severe error occured while a client was connecting.");
+					e.printStackTrace();
+				}
+			}
 			
-		}
+		});
 	}
 	
 	@Override
@@ -51,4 +63,5 @@ public final class MonitorMeCore extends JavaPlugin
 	{
 		
 	}
-}
+	
+	}
