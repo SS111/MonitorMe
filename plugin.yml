@@ -1,6 +1,5 @@
 name: MonitorMe
-version: 1.0.0
+version: TEST_2
 author: SS111
 website: ss111.github.com
 main: com.github.ss111.MonitorMeCore
-prefix: [MonitorMe]
