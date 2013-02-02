@@ -7,6 +7,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class MonitorMeCore extends JavaPlugin
 {
+	public ServerSocket ss;
+	public Socket cs;
+	public PrintWriter out;
+	public BufferedReader in;
+	
 	@Override
 	public void onEnable()
 	{
@@ -21,12 +26,23 @@ public final class MonitorMeCore extends JavaPlugin
 		
 		try
 		{
-			ServerSocket ss = new ServerSocket(config.getInt("Port"));
+			ss = new ServerSocket(config.getInt("Port"));
 		} 
 		catch (IOException e)
 		{
-			getLogger().severe("MonitorMe cannot listen on port " + config.getInt("Port") + "! Is the port correctly forwarded?");
+			getLogger().severe("Mini-server cannot listen on port " + config.getInt("Port") + "! Is the port correctly forwarded?");
 			e.printStackTrace();
+		}
+		
+		getLogger().info("Mini-server is enabled and listening on port " + config.getInt("Port") + "!");
+		
+		try
+		{
+			cs = ss.accept();
+		}
+		catch (IOException e)
+		{
+			
 		}
 	}
 	
