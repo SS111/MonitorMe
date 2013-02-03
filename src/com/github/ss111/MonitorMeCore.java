@@ -11,6 +11,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.PlayerGameModeChangeEvent;
+import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -30,39 +32,93 @@ public class MonitorMeCore extends JavaPlugin
 		@EventHandler (priority = EventPriority.MONITOR)
 		public void onPlayerLogin(PlayerLoginEvent event)
 		{
-			if (Allowed == false)
+			if (Allowed.equals(false))
 			{
 				
 			}
 			else
 			{
 				//Send data to Android saying that someone logged in
+				out.println("login: " + event.getPlayer().getName() + " logged in.");
 			}
 		}
 		
 		@EventHandler (priority = EventPriority.MONITOR)
 		public void onPlayerQuit (PlayerQuitEvent event)
 		{
-			if (Allowed == false)
+			if (Allowed.equals(false))
 			{
 				
 			}
 			else
 			{
 				//Send data to Android saying that someone logged out
+				out.println("logout: " + event.getPlayer().getName() + " logged out.");
 			}
 		}
 		
 		@EventHandler (priority = EventPriority.MONITOR)
 		public void onPlayerChat (PlayerChatEvent event)
 		{
-			if (Allowed == false)
+			if (Allowed.equals(false))
 			{
 				
 			}
 			else
 			{
-				//Send data to Android saying the person's chat message
+				if (event.isCancelled())
+				{
+					
+				}
+				else
+				{
+					//Send data to Android saying the person's chat message
+					out.println("chat: " + event.getPlayer().getName() + ": " + event.getMessage());
+				}
+			}
+		}
+		
+		@EventHandler (priority = EventPriority.MONITOR)
+		public void onGamemodeChange (PlayerGameModeChangeEvent event)
+		{
+			if (Allowed.equals(false))
+			{
+				
+			}
+			else
+			{
+				if (event.isCancelled())
+				{
+					
+				}
+				else
+				{
+					//Send data to Android saying someone's gamemode changed
+					out.println("gamemode: " + event.getPlayer().getName() + "'s gamemode was changed to " + event.getNewGameMode().getValue());
+					//Does this also work?
+					//out.println("gamemode: " + event.getPlayer().getName() + "'s gamemode was changed to " + event.getNewGameMode().getByValue(event.getNewGameMode().getValue()).toString());
+				}
+			}
+		}
+		
+		@EventHandler (priority = EventPriority.MONITOR)
+		public void onPlayerKick(PlayerKickEvent event)
+		{
+			if (Allowed.equals(false))
+			{
+				
+			}
+			else
+			{
+				if (event.isCancelled())
+				{
+					
+				}
+				else
+				{
+					//Send data to Android saying someone was kicked
+					out.println("kick: " + event.getPlayer().getName() + " was kicked for reason: " + event.getReason());
+				}
 			}
 		}
 	}
@@ -133,7 +189,11 @@ public class MonitorMeCore extends JavaPlugin
 				{
 					getLogger().severe("A severe error occured while a client was connecting.");
 					
+					e.printStackTrace();
+					
 					cs = null;
+					Allowed = false;
+					
 					run();
 				}
 			}
