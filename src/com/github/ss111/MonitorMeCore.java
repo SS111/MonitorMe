@@ -15,8 +15,6 @@ import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 @SuppressWarnings("deprecation")
@@ -123,41 +121,6 @@ public class MonitorMeCore extends JavaPlugin
 				}
 			}
 		}
-		
-		@EventHandler (priority = EventPriority.MONITOR)
-		public void onPlayerTeleport(PlayerTeleportEvent event)
-		{
-			if (Allowed.equals(false))
-			{
-				
-			}
-			else
-			{
-				if (event.isCancelled())
-				{
-					
-				}
-				else
-				{
-					//Send data to Andoird saying someone teleported
-					out.println("teleport: " + event.getPlayer().getName() + " teleported from X: " + event.getFrom().getX() + " Y: " + event.getFrom().getY() + " Z: " + event.getFrom().getZ() + " to X: " + event.getTo().getX() + " Y: " + event.getTo().getY() + " Z: " + event.getTo().getZ());
-				}
-			}
-		}
-		
-		@EventHandler (priority = EventPriority.MONITOR)
-		public void onServerCommand(ServerCommandEvent event)
-		{
-			if (Allowed.equals(false))
-			{
-				
-			}
-			else
-			{
-				//Send data to Android saying someone sent a command
-				out.println("command: " + event.getSender().getName() + " sent command: " + event.getCommand());
-			}
-		}
 	}
 	
 	@Override
@@ -170,9 +133,7 @@ public class MonitorMeCore extends JavaPlugin
 		config.options().copyDefaults(true);
 		saveConfig();
 		
-		getLogger().info("Registering data listener...");
 		getServer().getPluginManager().registerEvents(new DataListener(), this);
-		getLogger().info("Data listener registered!");
 		
 		getLogger().info("MonitorMe loaded! Starting mini-server...");
 		
