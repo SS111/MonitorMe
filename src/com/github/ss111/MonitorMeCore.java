@@ -214,6 +214,8 @@ public class MonitorMeCore extends JavaPlugin
 							{
 								Allowed = true;
 								getLogger().info("Client connected with the correct password.");
+								ListenForData();
+								
 							}
 							else
 							{
@@ -253,6 +255,39 @@ public class MonitorMeCore extends JavaPlugin
 			getLogger().warning("An error occurred while trying to close the server or client socket.");
 			e.printStackTrace();
 		}
+	}
+	
+	//Is this void asnyc (ran from asnyc 'run' void) or not?
+	public void ListenForData()
+	{
+		getServer().getScheduler().runTaskAsynchronously(this, new Runnable()
+		{
+
+			@Override
+			public void run()
+			{
+				while (true)
+				{
+					try
+					{
+						String input = in.readLine();
+						if (input.equals(""))
+						{
+							
+						}
+						else
+						{
+							//Do stuff with data
+						}
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+					}
+				}
+			}
+			
+		});
 	}
 	
 	}
