@@ -1,12 +1,11 @@
 package com.github.ss111;
-import java.math.BigInteger;
-import java.net.*;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Security;
-import java.io.*;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -57,20 +56,13 @@ public class MonitorMeCore extends JavaPlugin
 					
 					in = new BufferedReader(new InputStreamReader(cs.getInputStream()));
 					out = new PrintWriter(cs.getOutputStream(), true);
-					
-					Security.addProvider(new BouncyCastleProvider());
-					
-					
+
 					while (Allowed == false)
 					{
-						try 
-						{
-							MessageDigest md = MessageDigest.getInstance("SHA-512", "BC");
-							
+						
 							String data = in.readLine();
 							
-							byte[] digesttest = md.digest(data.getBytes());
-							String FinalHash = String.format("%0128x", new BigInteger(1, digesttest));
+							String FinalHash = DigestUtils.sha512Hex(data);
 							
 							if (FinalHash.equals(PasswordHash))
 							{
@@ -82,23 +74,8 @@ public class MonitorMeCore extends JavaPlugin
 								getLogger().warning("The client connected with bad SHA-512 hash: " + FinalHash);
 								
 								data = null;
-								digesttest = null;
 								FinalHash = null;
-								md = null;
 							}
-							
-							
-						}
-						catch (NoSuchAlgorithmException e)
-						{
-							getLogger().severe("Wut? SHA-512 doesn't exist?");
-							e.printStackTrace();
-						} 
-						catch (NoSuchProviderException e)
-						{
-							getLogger().severe("Could not find Bouncy Castle. Did you modify this JAR?");
-							e.printStackTrace();
-						}
 					}
 				} 
 				catch (IOException e)
