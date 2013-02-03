@@ -7,8 +7,15 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+@SuppressWarnings("deprecation")
 public class MonitorMeCore extends JavaPlugin
 {
 	public ServerSocket ss;
@@ -17,6 +24,48 @@ public class MonitorMeCore extends JavaPlugin
 	public BufferedReader in;
 	public String PasswordHash;
 	public Boolean Allowed;
+	
+	public class DataListener implements Listener
+	{
+		@EventHandler (priority = EventPriority.MONITOR)
+		public void onPlayerLogin(PlayerLoginEvent event)
+		{
+			if (Allowed == false)
+			{
+				
+			}
+			else
+			{
+				//Send data to Android saying that someone logged in
+			}
+		}
+		
+		@EventHandler (priority = EventPriority.MONITOR)
+		public void onPlayerQuit (PlayerQuitEvent event)
+		{
+			if (Allowed == false)
+			{
+				
+			}
+			else
+			{
+				//Send data to Android saying that someone logged out
+			}
+		}
+		
+		@EventHandler (priority = EventPriority.MONITOR)
+		public void onPlayerChat (PlayerChatEvent event)
+		{
+			if (Allowed == false)
+			{
+				
+			}
+			else
+			{
+				//Send data to Android saying the person's chat message
+			}
+		}
+	}
 	
 	@Override
 	public void onEnable()
@@ -27,6 +76,8 @@ public class MonitorMeCore extends JavaPlugin
 		config.options().header("NOTE: To make your password, go to http://www.fileformat.info/tool/hash.htm and get the SHA-512 hash! The default password is \"test123\"");
 		config.options().copyDefaults(true);
 		saveConfig();
+		
+		getServer().getPluginManager().registerEvents(new DataListener(), this);
 		
 		getLogger().info("MonitorMe loaded! Starting mini-server...");
 		
@@ -82,7 +133,8 @@ public class MonitorMeCore extends JavaPlugin
 				{
 					getLogger().severe("A severe error occured while a client was connecting.");
 					
-					e.printStackTrace();
+					cs = null;
+					run();
 				}
 			}
 			
