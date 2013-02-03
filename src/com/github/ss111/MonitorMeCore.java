@@ -1,7 +1,12 @@
 package com.github.ss111;
+import java.math.BigInteger;
 import java.net.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Security;
 import java.io.*;
-
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -12,6 +17,7 @@ public class MonitorMeCore extends JavaPlugin
 	public PrintWriter out;
 	public BufferedReader in;
 	public String PasswordHash;
+	public Boolean Allowed;
 	
 	@Override
 	public void onEnable()
@@ -46,11 +52,60 @@ public class MonitorMeCore extends JavaPlugin
 				try
 				{
 					cs = ss.accept();
+					
+					getLogger().info("A client connected to MonitorMe's mini-server with IP: " + cs.getRemoteSocketAddress().toString() + ". Asking for authentication.");
+					
+					in = new BufferedReader(new InputStreamReader(cs.getInputStream()));
+					out = new PrintWriter(cs.getOutputStream(), true);
+					
+					Security.addProvider(new BouncyCastleProvider());
+					
+					
+					while (Allowed == false)
+					{
+						try 
+						{
+							MessageDigest md = MessageDigest.getInstance("SHA-512", "BC");
+							
+							String data = in.readLine();
+							
+							byte[] digesttest = md.digest(data.getBytes());
+							String FinalHash = String.format("%0128x", new BigInteger(1, digesttest));
+							
+							if (FinalHash.equals(PasswordHash))
+							{
+								Allowed = true;
+								getLogger().info("Client connected with the correct password.");
+							}
+							else
+							{
+								getLogger().warning("The client connected with bad SHA-512 hash: " + FinalHash);
+								
+								data = null;
+								digesttest = null;
+								FinalHash = null;
+								md = null;
+							}
+							
+							
+						}
+						catch (NoSuchAlgorithmException e)
+						{
+							getLogger().severe("Wut? SHA-512 doesn't exist?");
+							e.printStackTrace();
+						} 
+						catch (NoSuchProviderException e)
+						{
+							getLogger().severe("Could not find Bouncy Castle. Did you modify this JAR?");
+							e.printStackTrace();
+						}
+					}
 				} 
 				catch (IOException e)
 				{
-					//Is this thread safe?
+					//Is this line of code thread safe?
 					getLogger().severe("A severe error occured while a client was connecting.");
+					
 					e.printStackTrace();
 				}
 			}
@@ -61,7 +116,16 @@ public class MonitorMeCore extends JavaPlugin
 	@Override
 	public void onDisable()
 	{
-		
+		try
+		{
+			ss.close();
+			cs.close();
+		} 
+		catch (IOException e)
+		{
+			getLogger().warning("An error occurred while trying to close the server or client socket.");
+			e.printStackTrace();
+		}
 	}
 	
 	}
