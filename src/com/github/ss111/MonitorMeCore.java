@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -189,6 +190,82 @@ public class MonitorMeCore extends JavaPlugin
 		
 		PasswordHash = config.getString("Password");
 		
+		WaitForAccept();
+	}
+	
+	@Override
+	public void onDisable()
+	{
+		try
+		{
+			ss.close();
+			cs.close();
+		} 
+		catch (IOException e)
+		{
+			getLogger().warning("An error occurred while trying to close the server or client socket.");
+			e.printStackTrace();
+		}
+	}
+	
+	//Is this void asnyc (ran from asnyc 'run' void) or not?
+	public void ListenForData()
+	{
+		getServer().getScheduler().runTaskAsynchronously(this, new Runnable()
+		{
+
+			@Override
+			public void run()
+			{
+				while (true)
+				{
+					try
+					{
+						String input = new String(in.readLine());
+						if (input.equals(""))
+						{
+							
+						}
+						else
+						{
+							if (input.startsWith("command: "))
+							{
+								input.replace("command: ", "");
+								if (input.contains("/"))
+								{
+									input.replace("/", "");
+									ExecuteCommand(input);
+								}
+								else
+								{
+									ExecuteCommand(input);
+								}
+								
+							}
+						}
+					}
+					catch (IOException e)
+					{
+						//The client has disconnected, right?
+						getLogger().info("Client has disconnected.");
+						cs = null;
+						Allowed = false;
+						e.printStackTrace();
+					}
+				}
+			}
+			
+		});
+	}
+	
+	public void ExecuteCommand(String Command)
+	{
+		getServer().dispatchCommand(Bukkit.getConsoleSender(), Command);
+		out.println("info: " + "Command was completed successfuly.");
+	}
+	
+	public void WaitForAccept()
+	{
 		getServer().getScheduler().runTaskAsynchronously(this, new Runnable()
 		{
 			@Override
@@ -236,54 +313,6 @@ public class MonitorMeCore extends JavaPlugin
 					Allowed = false;
 					
 					run();
-				}
-			}
-			
-		});
-	}
-	
-	@Override
-	public void onDisable()
-	{
-		try
-		{
-			ss.close();
-			cs.close();
-		} 
-		catch (IOException e)
-		{
-			getLogger().warning("An error occurred while trying to close the server or client socket.");
-			e.printStackTrace();
-		}
-	}
-	
-	//Is this void asnyc (ran from asnyc 'run' void) or not?
-	public void ListenForData()
-	{
-		getServer().getScheduler().runTaskAsynchronously(this, new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-				while (true)
-				{
-					try
-					{
-						String input = in.readLine();
-						if (input.equals(""))
-						{
-							
-						}
-						else
-						{
-							//Do stuff with data
-						}
-					}
-					catch (IOException e)
-					{
-						e.printStackTrace();
-					}
 				}
 			}
 			
