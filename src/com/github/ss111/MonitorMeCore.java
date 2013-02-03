@@ -146,6 +146,7 @@ public class MonitorMeCore extends JavaPlugin
 			}
 		}
 		
+		//Gah, this event cannot be passed when an invalid command is entered. Annoying.
 		@EventHandler (priority = EventPriority.MONITOR)
 		public void onServerCommand(ServerCommandEvent event)
 		{
@@ -208,62 +209,6 @@ public class MonitorMeCore extends JavaPlugin
 		}
 	}
 	
-	//Is this void asnyc (ran from asnyc 'run' void) or not?
-	public void ListenForData()
-	{
-		getServer().getScheduler().runTaskAsynchronously(this, new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-				while (true)
-				{
-					try
-					{
-						String input = new String(in.readLine());
-						if (input.equals(""))
-						{
-							
-						}
-						else
-						{
-							if (input.startsWith("command: "))
-							{
-								input.replace("command: ", "");
-								if (input.contains("/"))
-								{
-									input.replace("/", "");
-									ExecuteCommand(input);
-								}
-								else
-								{
-									ExecuteCommand(input);
-								}
-								
-							}
-						}
-					}
-					catch (IOException e)
-					{
-						//The client has disconnected, right?
-						getLogger().info("Client has disconnected.");
-						cs = null;
-						Allowed = false;
-						e.printStackTrace();
-					}
-				}
-			}
-			
-		});
-	}
-	
-	public void ExecuteCommand(String Command)
-	{
-		getServer().dispatchCommand(Bukkit.getConsoleSender(), Command);
-		out.println("info: " + "Command was completed successfuly.");
-	}
-	
 	public void WaitForAccept()
 	{
 		getServer().getScheduler().runTaskAsynchronously(this, new Runnable()
@@ -317,6 +262,74 @@ public class MonitorMeCore extends JavaPlugin
 			}
 			
 		});
+	}
+	
+	//Is this void asnyc (ran from asnyc 'run' void) or not?
+	public void ListenForData()
+	{
+		getServer().getScheduler().runTaskAsynchronously(this, new Runnable()
+		{
+
+			@Override
+			public void run()
+			{
+				while (true)
+				{
+					try
+					{
+						String input = new String(in.readLine());
+						if (input.equals(""))
+						{
+							
+						}
+						else
+						{
+							if (input.startsWith("command: "))
+							{
+								input.replace("command: ", "");
+								if (input.contains("/"))
+								{
+									input.replace("/", "");
+									ExecuteCommand(input);
+								}
+								else
+								{
+									ExecuteCommand(input);
+								}
+								
+							}
+							else if (input.startsWith("chat: "))
+							{
+								input.replace("chat: ", "");
+								Chat(input);
+							}
+						}
+						
+					}
+					catch (IOException e)
+					{
+						//The client has disconnected, right?
+						getLogger().info("Client has disconnected.");
+						cs = null;
+						Allowed = false;
+						e.printStackTrace();
+					}
+				}
+			}
+			
+		});
+	}
+	
+	public void ExecuteCommand(String Command)
+	{
+		getServer().dispatchCommand(Bukkit.getConsoleSender(), Command);
+		out.println("info: " + "Command was completed successfuly.");
+	}
+	
+	public void Chat(String Message)
+	{
+		getServer().broadcastMessage(Message);
+		out.println("info: " + "Chat message was sent successfuly.");
 	}
 	
 	}
