@@ -80,7 +80,6 @@ public class MonitorMeCore extends JavaPlugin
 				} 
 				catch (IOException e)
 				{
-					//Is this line of code thread safe?
 					getLogger().severe("A severe error occured while a client was connecting.");
 					
 					e.printStackTrace();
