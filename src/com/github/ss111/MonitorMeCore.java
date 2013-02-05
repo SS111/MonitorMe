@@ -1,165 +1,77 @@
 package com.github.ss111;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerChatEvent;
-import org.bukkit.event.player.PlayerGameModeChangeEvent;
-import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.event.server.ServerCommandEvent;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
-@SuppressWarnings("deprecation")
 public class MonitorMeCore extends JavaPlugin
 {
 	public ServerSocket ss;
-	public Socket cs;
-	public PrintWriter out;
-	public BufferedReader in;
+	public static Socket cs;
 	public String PasswordHash;
-	public Boolean Allowed;
+	public PrintWriter pw;
+	public BufferedReader br;
+	public Boolean Accepted = false;
 	
-	public class DataListener implements Listener
+	public void Log(String message, String type)
 	{
-		@EventHandler (priority = EventPriority.MONITOR)
-		public void onPlayerLogin(PlayerLoginEvent event)
+		if (type.equals("info"))
 		{
-			if (Allowed.equals(false))
-			{
-				
-			}
-			else
-			{
-				//Send data to Android saying that someone logged in
-				out.println("login: " + event.getPlayer().getName() + " logged in.");
-			}
+			getLogger().info(message);
 		}
-		
-		@EventHandler (priority = EventPriority.MONITOR)
-		public void onPlayerQuit (PlayerQuitEvent event)
+		else if (type.equals("warning"))
 		{
-			if (Allowed.equals(false))
-			{
-				
-			}
-			else
-			{
-				//Send data to Android saying that someone logged out
-				out.println("logout: " + event.getPlayer().getName() + " logged out.");
-			}
+			getLogger().warning(message);
 		}
-		
-		@EventHandler (priority = EventPriority.MONITOR)
-		public void onPlayerChat (PlayerChatEvent event)
+		else if (type.equals("severe"))
 		{
-			if (Allowed.equals(false))
-			{
-				
-			}
-			else
-			{
-				if (event.isCancelled())
-				{
-					
-				}
-				else
-				{
-					//Send data to Android saying the person's chat message
-					out.println("chat: " + event.getPlayer().getName() + ": " + event.getMessage());
-				}
-			}
+			getLogger().severe(message);
 		}
-		
-		@EventHandler (priority = EventPriority.MONITOR)
-		public void onGamemodeChange (PlayerGameModeChangeEvent event)
+		else
 		{
-			if (Allowed.equals(false))
-			{
-				
-			}
-			else
-			{
-				if (event.isCancelled())
-				{
-					
-				}
-				else
-				{
-					//Send data to Android saying someone's gamemode changed
-					out.println("gamemode: " + event.getPlayer().getName() + "'s gamemode was changed to " + event.getNewGameMode().getValue());
-					//Does this also work?
-					//out.println("gamemode: " + event.getPlayer().getName() + "'s gamemode was changed to " + event.getNewGameMode().getByValue(event.getNewGameMode().getValue()).toString());
-				}
-			}
+			getLogger().warning("Invalid use of core function: Log");
 		}
-		
-		@EventHandler (priority = EventPriority.MONITOR)
-		public void onPlayerKick(PlayerKickEvent event)
+	}
+	
+	public void ExecuteCommand(String Command) throws IOException
+	{
+		getServer().dispatchCommand(Bukkit.getConsoleSender(), Command);
+		DataWriterOut writer = new DataWriterOut();
+        writer.Write(pw, cs, "info: " + "Command was completed successfuly.");
+	}
+	
+	public void Chat(String Message) throws IOException
+	{
+		getServer().broadcastMessage(Message);
+		DataWriterOut writer = new DataWriterOut();
+		 writer.Write(pw, cs, "info: " + "Chat message was sent successfuly.");
+	}
+	
+	public void EnableOrDisableListener(String type)
+	{
+		if (type.equals("enable"))
 		{
-			if (Allowed.equals(false))
-			{
-				
-			}
-			else
-			{
-				if (event.isCancelled())
-				{
-					
-				}
-				else
-				{
-					//Send data to Android saying someone was kicked
-					out.println("kick: " + event.getPlayer().getName() + " was kicked for reason: " + event.getReason());
-				}
-			}
+			getServer().getPluginManager().registerEvents(new DataListener(), this);
 		}
-		
-		@EventHandler (priority = EventPriority.MONITOR)
-		public void onPlayerTeleport(PlayerTeleportEvent event)
+		else if (type.equals("disable"))
 		{
-			if (Allowed.equals(false))
-			{
-				
-			}
-			else
-			{
-				if (event.isCancelled())
-				{
-					
-				}
-				else
-				{
-					//Send data to Andoird saying someone teleported
-					out.println("teleport: " + event.getPlayer().getName() + " teleported from X: " + event.getFrom().getX() + " Y: " + event.getFrom().getY() + " Z: " + event.getFrom().getZ() + " to X: " + event.getTo().getX() + " Y: " + event.getTo().getY() + " Z: " + event.getTo().getZ());
-				}
-			}
+			HandlerList.unregisterAll(new DataListener());
 		}
-		
-		//Gah, this event cannot be passed when an invalid command is entered. Annoying.
-		@EventHandler (priority = EventPriority.MONITOR)
-		public void onServerCommand(ServerCommandEvent event)
+		else
 		{
-			if (Allowed.equals(false))
-			{
-				
-			}
-			else
-			{
-				//Send data to Android saying someone sent a command
-				out.println("command: " + event.getSender().getName() + " sent command: " + event.getCommand());
-			}
+			getLogger().warning("Invalid use of core function: EnableOrDisableListener");
 		}
+	}
+	
+	public static Socket GetClientSocket()
+	{
+		return cs;
 	}
 	
 	@Override
@@ -171,10 +83,6 @@ public class MonitorMeCore extends JavaPlugin
 		config.options().header("NOTE: To make your password, go to http://www.fileformat.info/tool/hash.htm and get the SHA-512 hash! The default password is \"test123\"");
 		config.options().copyDefaults(true);
 		saveConfig();
-		
-		getLogger().info("Registering data listener...");
-		getServer().getPluginManager().registerEvents(new DataListener(), this);
-		getLogger().info("Data listener registered!");
 		
 		getLogger().info("MonitorMe loaded! Starting mini-server...");
 		
@@ -211,6 +119,8 @@ public class MonitorMeCore extends JavaPlugin
 	
 	public void WaitForAccept()
 	{
+		final DataReaderIn reader = new DataReaderIn();
+		
 		getServer().getScheduler().runTaskAsynchronously(this, new Runnable()
 		{
 			@Override
@@ -218,45 +128,62 @@ public class MonitorMeCore extends JavaPlugin
 			{
 				try
 				{
-					cs = ss.accept();
-					
-					getLogger().info("A client connected to MonitorMe's mini-server with IP: " + cs.getRemoteSocketAddress().toString() + ". Asking for authentication.");
-					
-					in = new BufferedReader(new InputStreamReader(cs.getInputStream()));
-					out = new PrintWriter(cs.getOutputStream(), true);
-
-					while (Allowed == false)
+					if (Accepted.equals(false))
+					{
+						cs = ss.accept();
+						Accepted = true;
+						Log("A client connected with IP: " + cs.getRemoteSocketAddress().toString() + ". Asking for authentication.", "info");
+					}
+					else
 					{
 						
-							String data = in.readLine();
-							
-							String FinalHash = DigestUtils.sha512Hex(data);
-							
-							if (FinalHash.equals(PasswordHash))
+					}
+					
+					String RemotePasswordPlainText = reader.Read(br, cs);
+					String RemotePasswordHash = DigestUtils.sha512Hex(RemotePasswordPlainText);
+					
+					if (RemotePasswordHash.equals(PasswordHash))
+					{
+						Log("Client connected with correct password.", "info");
+						
+						EnableOrDisableListener("enable");
+						ListenForData();
+						
+						//Make sure that the client socket hasen't closed... this should solve a lot of problems... I hope
+						while (true)
+						{
+							if (cs.isClosed())
 							{
-								Allowed = true;
-								getLogger().info("Client connected with the correct password.");
-								ListenForData();
-								
+								Accepted = false;
+								EnableOrDisableListener("disable");
+								run();
+								break;
 							}
 							else
 							{
-								getLogger().warning("The client connected with bad SHA-512 hash: " + FinalHash);
-								
-								data = null;
-								FinalHash = null;
+
 							}
+						}
 					}
-				} 
+					else
+					{
+						Log("Client connected with bad password hash: " + RemotePasswordHash, "warning");
+						RemotePasswordPlainText = null;
+						RemotePasswordHash = null;
+						
+						run();
+					}
+					
+				}
 				catch (IOException e)
 				{
-					getLogger().severe("A severe error occured while a client was connecting.");
-					
+					//Is this only an error on connection? Or also when leaving without correct password?
+					Log("A severe error occured while a client was connecting.", "severe");
 					e.printStackTrace();
 					
 					cs = null;
-					Allowed = false;
-					
+					Accepted = false;
+							
 					run();
 				}
 			}
@@ -264,20 +191,21 @@ public class MonitorMeCore extends JavaPlugin
 		});
 	}
 	
-	//Is this void asnyc (ran from asnyc 'run' void) or not?
 	public void ListenForData()
 	{
+		final DataReaderIn reader = new DataReaderIn();
+		
 		getServer().getScheduler().runTaskAsynchronously(this, new Runnable()
 		{
 
 			@Override
 			public void run()
 			{
-				while (true)
+				while (Accepted.equals(true))
 				{
 					try
 					{
-						String input = new String(in.readLine());
+						String input = reader.Read(br, cs);
 						if (input.equals(""))
 						{
 							
@@ -296,7 +224,6 @@ public class MonitorMeCore extends JavaPlugin
 								{
 									ExecuteCommand(input);
 								}
-								
 							}
 							else if (input.startsWith("chat: "))
 							{
@@ -304,32 +231,16 @@ public class MonitorMeCore extends JavaPlugin
 								Chat(input);
 							}
 						}
-						
 					}
 					catch (IOException e)
 					{
-						//The client has disconnected, right?
-						getLogger().info("Client has disconnected.");
-						cs = null;
-						Allowed = false;
+						//Should never be fired because the while loop in WaitForAccept() should tell me if the socket died. Idk though.
 						e.printStackTrace();
 					}
 				}
 			}
 			
 		});
-	}
-	
-	public void ExecuteCommand(String Command)
-	{
-		getServer().dispatchCommand(Bukkit.getConsoleSender(), Command);
-		out.println("info: " + "Command was completed successfuly.");
-	}
-	
-	public void Chat(String Message)
-	{
-		getServer().broadcastMessage(Message);
-		out.println("info: " + "Chat message was sent successfuly.");
 	}
 	
 	}
