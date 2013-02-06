@@ -42,14 +42,14 @@ public class MonitorMeCore extends JavaPlugin
 	public void ExecuteCommand(String Command) throws IOException
 	{
 		getServer().dispatchCommand(Bukkit.getConsoleSender(), Command);
-		DataWriterOut writer = new DataWriterOut();
+		DataWriter writer = new DataWriter();
         writer.Write(pw, cs, "info: " + "Command was completed successfuly.");
 	}
 	
 	public void Chat(String Message) throws IOException
 	{
 		getServer().broadcastMessage(Message);
-		DataWriterOut writer = new DataWriterOut();
+		DataWriter writer = new DataWriter();
 		 writer.Write(pw, cs, "info: " + "Chat message was sent successfuly.");
 	}
 	
@@ -119,7 +119,7 @@ public class MonitorMeCore extends JavaPlugin
 	
 	public void WaitForAccept()
 	{
-		final DataReaderIn reader = new DataReaderIn();
+		final DataReader reader = new DataReader();
 		
 		getServer().getScheduler().runTaskAsynchronously(this, new Runnable()
 		{
@@ -177,9 +177,7 @@ public class MonitorMeCore extends JavaPlugin
 				}
 				catch (IOException e)
 				{
-					//Is this only an error on connection? Or also when leaving without correct password?
-					Log("A severe error occured while a client was connecting.", "severe");
-					e.printStackTrace();
+					Log("A severe error occured while a client was connecting or the client disconnected without entering the proper password.", "warning");
 					
 					cs = null;
 					Accepted = false;
@@ -193,7 +191,7 @@ public class MonitorMeCore extends JavaPlugin
 	
 	public void ListenForData()
 	{
-		final DataReaderIn reader = new DataReaderIn();
+		final DataReader reader = new DataReader();
 		
 		getServer().getScheduler().runTaskAsynchronously(this, new Runnable()
 		{

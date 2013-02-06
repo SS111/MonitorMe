@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
-public class DataReaderIn
+public class DataReader
 {
 	public String Read(BufferedReader reader, Socket clientSocket) throws IOException
 	{

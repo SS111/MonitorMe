@@ -17,7 +17,7 @@ public class DataListener implements Listener
 	{
 	
 		PrintWriter pw;
-		DataWriterOut writer = new DataWriterOut();
+		DataWriter writer = new DataWriter();
 		
 		@EventHandler (priority = EventPriority.MONITOR)
 		public void onPlayerLogin(PlayerLoginEvent event) throws IOException
