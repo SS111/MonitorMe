@@ -304,6 +304,7 @@ public class MonitorMeCore extends JavaPlugin
 										if (entry.getKey().replace("admin: ", "").equals(recievePacketInput.getAddress().toString()))
 										{
 											clients.remove("admin: " + recievePacketInput.getAddress().toString());
+											log("Client " + recievePacketInput.getAddress().toString() + " has logged out.", "info");
 											break;
 										}
 									}
@@ -312,6 +313,7 @@ public class MonitorMeCore extends JavaPlugin
 										if (entry.getKey().replace("guest: ", "").equals(recievePacketInput.getAddress().toString()))
 										{
 											clients.remove("guest: " + recievePacketInput.getAddress().toString());
+											log("Client " + recievePacketInput.getAddress().toString() + " has logged out.", "info");
 											break;
 										}
 									}

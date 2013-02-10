@@ -9,7 +9,7 @@ import java.util.Map;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
@@ -17,7 +17,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 
-@SuppressWarnings("deprecation")
 public class EventListener implements Listener
 {
 	public DatagramSocket datagramServer = MonitorMeCore.GetServer();
@@ -160,7 +159,7 @@ public class EventListener implements Listener
 		}
 		
 		@EventHandler (priority = EventPriority.MONITOR)
-		public void onPlayerChat (PlayerChatEvent event)
+		public void onPlayerChat (AsyncPlayerChatEvent event)
 		{
 			if (!event.isCancelled())
 			{
