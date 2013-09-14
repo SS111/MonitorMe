@@ -1,3 +1,12 @@
+DISCONTINUED
+============
+This project has been discontinued due to a lack of time and much newer and easier methods to achieve what I was trying to do.
+
+
+
+
+
+
 Introduction
 ============
 Welcome, to MonitorMe. I wanted to be able to easily manage my server from an Android (or any device that supports UDP networking!) device. At first, it seemed like a dream, and it would be imposssible to make a successor to Minecraft MobileAdmin. A few weeks later, I started handcrafting that dream. Here I am now.
